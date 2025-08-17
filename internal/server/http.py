@@ -10,7 +10,7 @@ from internal.router import Router
 from config import Config
 from pkg.response import HttpCode
 from pkg.response import Response, json
-from internal.model import App
+from flask_cors import CORS
 
 
 class Http(Flask):
@@ -30,6 +30,15 @@ class Http(Flask):
         #     _ = App()
         #     db.create_all()
 
+        # 解决跨域问题
+        CORS(self, resources={
+            r"/*": {
+                "origins": "*",
+                "supports_credentials": True,
+                # "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                # "expose_headers": ["Content-Type"]
+            }
+        })
         router.register_router(self)
 
     def _register_error_handler(self, error: Exception):
