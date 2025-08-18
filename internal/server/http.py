@@ -35,8 +35,8 @@ class Http(Flask):
             r"/*": {
                 "origins": "*",
                 "supports_credentials": True,
-                # "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                # "expose_headers": ["Content-Type"]
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                "expose_headers": ["Content-Type"]
             }
         })
         router.register_router(self)

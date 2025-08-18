@@ -1,19 +1,20 @@
-import os
 import uuid
-
-from internal.schema.app_schema import CompletionReq
-from dotenv import load_dotenv
-from flask import request
-from openai import OpenAI
-from pkg.response import success_json, validate_error_json, success_message
-from internal.exception import FailException
-from internal.service import AppService
-from injector import inject
 from dataclasses import dataclass
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-from langchain_openai import ChatOpenAI
+from operator import itemgetter
 
+from dotenv import load_dotenv
+from injector import inject
+from langchain.chat_models import init_chat_model
+from langchain.memory import ConversationBufferWindowMemory
+from langchain_community.chat_message_histories import FileChatMessageHistory
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+
+from internal.exception import FailException
+from internal.schema.app_schema import CompletionReq
+from internal.service import AppService
+from pkg.response import success_json, validate_error_json, success_message
 
 load_dotenv()
 
@@ -35,13 +36,27 @@ class AppHandler:
 
         # query = request.json.get("query")
 
-        prompt = ChatPromptTemplate.from_template("{query}")
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", "你是一个强大的聊天机器人，能根据用户的提问回答对应的问题"),
+            MessagesPlaceholder("history"),
+            ("human", "{query}")
+        ])
 
-        llm = ChatOpenAI(
-            model=os.getenv("DASHSCOPE_MODEL"),
-            api_key=os.getenv("DASHSCOPE_API_KEY"),
-            base_url=os.getenv("DASHSCOPE_API_URL")
+        memory = ConversationBufferWindowMemory(
+            k=3,
+            input_key="query",
+            output_key="output",
+            return_messages=True,
+            chat_memory=FileChatMessageHistory(f"./storage/memory/{app_id}.txt")
         )
+
+        llm = init_chat_model(model="qwen3:latest", model_provider="ollama")
+
+        # llm = ChatOpenAI(
+        #     model=os.getenv("DASHSCOPE_MODEL"),
+        #     api_key=os.getenv("DASHSCOPE_API_KEY"),
+        #     base_url=os.getenv("DASHSCOPE_API_URL")
+        # )
 
         # client = OpenAI(
         #     api_key=os.getenv("DASHSCOPE_API_KEY"),
@@ -61,9 +76,12 @@ class AppHandler:
         # parser = StrOutputParser()
         #
         # content = parser.invoke(ai_message)
-        chain = prompt | llm | StrOutputParser()
-        content = chain.invoke({"query": req.query.data})
-
+        chain = RunnablePassthrough.assign(
+            history=RunnableLambda(memory.load_memory_variables) | itemgetter('history')
+        ) | prompt | llm | StrOutputParser()
+        chain_input = {"query": req.query.data}
+        content = chain.invoke(chain_input)
+        memory.save_context(chain_input, {"output": content})
         # content = completion.choices[0].message.content
         return success_json(content)
 
