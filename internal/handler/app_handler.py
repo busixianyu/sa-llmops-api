@@ -30,8 +30,11 @@ class AppHandler:
     provider_factory: ProviderFactory
 
     def ping(self):
-        google_serper = self.provider_factory.get_tool("google", "google_serper")
-        print(google_serper)
+        # google_serper = self.provider_factory.get_tool("google", "google_serper")
+        google = self.provider_factory.get_provider("google")
+        google_serper_entity = google.get_tool_entity("google_serper")
+        print(google_serper_entity.params)
+        print(google_serper_entity.name)
         return success_json(data="pong")
         # raise FailException("数据未找到")
 

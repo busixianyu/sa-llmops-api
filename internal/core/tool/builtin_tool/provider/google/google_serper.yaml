@@ -1,4 +1,22 @@
 name: google_serper
 label: 谷歌Serper搜索
 description: 谷歌搜索工具，支持搜索和结果解析
-params: []
+params:
+  - name: image_size
+    label: 图片大小
+    type: select
+    required: true
+    default: 1024✖️1024
+    options:
+      - value: 1024✖️1024
+        name: 方(1024✖️1024)
+      - value: 768✖️768
+        name: 方(768✖️768)
+      - value: 640✖️640
+        name: 方(640✖️640)
+      - value: 512✖️512
+        name: 方(512✖️512)
+      - value: 320✖️320
+        name: 方(320✖️320)
+      - value: 256✖️256
+        name: 方(256✖️256)
