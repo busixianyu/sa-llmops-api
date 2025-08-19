@@ -13,7 +13,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda, RunnableConfig
 from langchain_core.tracers import Run
-
+from internal.core.tool.builtin_tool.provider import ProviderFactory
 from internal.exception import FailException
 from internal.schema.app_schema import CompletionReq
 from internal.service import AppService
@@ -27,9 +27,13 @@ load_dotenv()
 class AppHandler:
 
     app_service: AppService
+    provider_factory: ProviderFactory
 
     def ping(self):
-        raise FailException("数据未找到")
+        google_serper = self.provider_factory.get_tool("google", "google_serper")
+        print(google_serper)
+        return success_json(data="pong")
+        # raise FailException("数据未找到")
 
     @staticmethod
     def _load_memory_variables(input: Dict[str, Any], config: RunnableConfig) -> Dict[str, Any]:

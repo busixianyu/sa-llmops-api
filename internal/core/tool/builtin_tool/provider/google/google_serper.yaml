@@ -1,0 +1,4 @@
+name: google_serper
+label: 谷歌Serper搜索
+description: 谷歌搜索工具，支持搜索和结果解析
+params: []
