@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint
-from internal.handler import AppHandler
+from internal.handler import AppHandler, BuiltinToolHandler
 from injector import inject
 from dataclasses import dataclass
 
@@ -9,6 +9,7 @@ class Router:
     """路由"""
 
     app_handler: AppHandler
+    builtin_tool_handler: BuiltinToolHandler
 
 
     def register_router(self, app: Flask):
@@ -21,5 +22,10 @@ class Router:
         bp.add_url_rule("/app/<uuid:id>", methods=["GET"],view_func=self.app_handler.get_app)
         bp.add_url_rule("/app/<uuid:id>", methods=["PUT"],view_func=self.app_handler.update_app)
         bp.add_url_rule("/app/<uuid:id>", methods=["DELETE"],view_func=self.app_handler.delete_app)
+
+        # 内置插件
+        bp.add_url_rule("/builtin-tool", methods=["GET"], view_func=self.builtin_tool_handler.get_builtin_tools)
+        bp.add_url_rule("/builtin-tool/<string:provider_name>/tool/<string:tool_name>", methods=["GET"], view_func=self.builtin_tool_handler.get_provider_tool)
+
         # 3.在应用上注册蓝图
         app.register_blueprint(bp)

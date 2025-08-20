@@ -3,7 +3,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 
-class ToolParamType(Enum):
+class ToolParamType(str, Enum):
     TEXT = "text"
     NUMBER = "number"
     BOOLEAN = "boolean"
