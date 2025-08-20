@@ -4,9 +4,15 @@
   icon: icon.svg
   background: "#E5E7EB"
   category: 网络搜索
-#- name: duckduckgo
-#  label: DuckDuckGo
-#  description: 隐私保护的搜索引擎
-#  icon: icon.svg
-#  background: "#FFFFFF"
-#  category: 网络搜索
+- name: duckduckgo
+  label: DuckDuckGo
+  description: 隐私保护的搜索引擎
+  icon: icon.svg
+  background: "#FFFFFF"
+  category: 网络搜索
+- name: time
+  label: 时间
+  description: 显示当前时间
+  icon: icon.svg
+  background: "#E5E7EB"
+  category: 实用工具
