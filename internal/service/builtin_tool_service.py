@@ -1,9 +1,15 @@
+import mimetypes
+import os.path
 from dataclasses import dataclass
+from unicodedata import category
+
 from injector import inject
 from pydantic import BaseModel
 
 from internal.core.tool.builtin_tool.provider import BuiltinProviderManager
 from internal.exception import NotFoundException
+
+from flask import current_app
 
 
 @inject
@@ -53,6 +59,33 @@ class BuiltinToolService:
             "inputs": self.get_tool_inputs(tool),
         }
         return builtin_tool
+
+    def get_provider_icon(self, provider_name: str)-> tuple[bytes, str]:
+        provider = self.builtin_provider_manager.get_provider(provider_name)
+        if provider is None:
+            raise NotFoundException(f"该提供商{provider_name}不存在")
+
+        icon = provider.provider_entity.icon
+        if icon is None:
+            raise NotFoundException("该提供商没有设置图标")
+
+        root_path = os.path.dirname(os.path.dirname(current_app.root_path))
+        provider_path = os.path.join(root_path, "internal", "core", "tool", "builtin_tool", "provider", provider_name)
+        icon_path = os.path.join(provider_path, "_asset", icon)
+
+        if not os.path.exists(icon_path):
+            raise NotFoundException(f"该提供商{provider_name}的图标{icon}不存在")
+
+        icon_type, _ = mimetypes.guess_type(icon_path)
+        icon_type = icon_type or "application/octet-stream"
+        with open(icon_path, "rb") as f:
+            byte_data = f.read()
+
+        return byte_data, icon_type
+
+    def get_provider_categories(self) -> list[str]:
+        provider_entities = self.builtin_provider_manager.get_provider_entities()
+        return [provider_entity.category for provider_entity in provider_entities]
 
     @staticmethod
     def get_tool_inputs(tool) -> list:
