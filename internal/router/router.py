@@ -1,5 +1,5 @@
 from flask import Flask, Blueprint
-from internal.handler import AppHandler, BuiltinToolHandler
+from internal.handler import AppHandler, BuiltinToolHandler, ApiToolHandler
 from injector import inject
 from dataclasses import dataclass
 
@@ -10,6 +10,7 @@ class Router:
 
     app_handler: AppHandler
     builtin_tool_handler: BuiltinToolHandler
+    api_tool_handler: ApiToolHandler
 
 
     def register_router(self, app: Flask):
@@ -35,6 +36,12 @@ class Router:
             "/builtin-tool/categories",
             methods=["GET"],
             view_func=self.builtin_tool_handler.get_provider_categories
+        )
+
+        bp.add_url_rule(
+            "/api-tool/validate-openapi-schema",
+            methods=["POST"],
+            view_func=self.api_tool_handler.validate_openapi_schema
         )
 
         # 3.在应用上注册蓝图
