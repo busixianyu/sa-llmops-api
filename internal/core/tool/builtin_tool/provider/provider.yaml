@@ -4,18 +4,24 @@
   icon: icon.svg
   background: "#E5E7EB"
   category: 网络搜索
+  created_at: 1722498386
+
 - name: duckduckgo
   label: DuckDuckGo
   description: 隐私保护的搜索引擎
   icon: icon.svg
   background: "#FFFFFF"
   category: 网络搜索
+  created_at: 1722498386
+
 - name: time
   label: 时间
   description: 显示当前时间
   icon: icon.svg
   background: "#E5E7EB"
   category: 实用工具
+  created_at: 1722498386
+
 - name: dalle
   label: DALLE
   description: DALLE是一个文生图工具。
@@ -23,6 +29,7 @@
   background: "#E5E7EB"
   category: image
   created_at: 1722498386
+
 - name: gaode
   label: 高德工具包
   description: 内置了高德天气预报和ip查询功能。
@@ -30,6 +37,7 @@
   background: "#E5E7EB"
   category: tool
   created_at: 1722498386
+
 - name: wikipedia
   label: 维基百科
   description: 维基百科是一个由全世界的志愿者创建和编辑的免费在线百科全书。

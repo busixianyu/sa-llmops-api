@@ -15,6 +15,7 @@ class ProviderEntity(BaseModel):
     icon: str = Field(description="图标地址")
     background: str = Field(description="图标背景色")
     category: str = Field(description="分类")
+    created_at: int = Field(description="提供商/工具的创建时间", default=0)
 
 
 class Provider(BaseModel):
@@ -42,7 +43,6 @@ class Provider(BaseModel):
 
     def get_tool_entities(self) -> list[ToolEntity]:
         return list(self.tool_entity_map.values())
-
 
     def _provider_init(self) -> None:
         """服务提供商初始化函数"""

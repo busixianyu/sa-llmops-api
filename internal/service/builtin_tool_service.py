@@ -47,8 +47,9 @@ class BuiltinToolService:
         tool = provider.get_tool_entity(tool_name)
 
         builtin_tool = {
-            "provider": {**provider_entity.model_dump(exclude={"icon", })},
+            "provider": {**provider_entity.model_dump(exclude={"icon", "created_at"})},
             **tool_entity.model_dump(),
+            "created_at": provider_entity.created_at,
             "inputs": self.get_tool_inputs(tool),
         }
         return builtin_tool
@@ -63,6 +64,6 @@ class BuiltinToolService:
                     "name": field_name,
                     "type": model_field.annotation.__name__,
                     "description": model_field.description or "",
-                    "required": model_field.default_factory is None,
+                    "required": model_field.is_required()
                 })
         return inputs
