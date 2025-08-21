@@ -1,13 +1,15 @@
 import mimetypes
 import os.path
 from dataclasses import dataclass
-from unicodedata import category
+from typing import Any
 
 from injector import inject
 from pydantic import BaseModel
 
 from internal.core.tool.builtin_tool.provider import BuiltinProviderManager
 from internal.exception import NotFoundException
+
+from internal.core.tool.builtin_tool.category import BuiltinCategoryManager
 
 from flask import current_app
 
@@ -20,6 +22,7 @@ class BuiltinToolService:
     """
 
     builtin_provider_manager: BuiltinProviderManager
+    builtin_category_manager: BuiltinCategoryManager
 
     def get_builtin_tools(self) -> list:
         providers = self.builtin_provider_manager.get_providers()
@@ -83,9 +86,14 @@ class BuiltinToolService:
 
         return byte_data, icon_type
 
-    def get_provider_categories(self) -> list[str]:
-        provider_entities = self.builtin_provider_manager.get_provider_entities()
-        return [provider_entity.category for provider_entity in provider_entities]
+    def get_provider_categories(self) -> list[dict[str, Any]]:
+        category_map = self.builtin_category_manager.get_category_map()
+        return [{
+            "name": category["entity"].name,
+            "category": category["entity"].category,
+            "icon": category["icon"]
+        } for category in category_map.values()]
+
 
     @staticmethod
     def get_tool_inputs(tool) -> list:

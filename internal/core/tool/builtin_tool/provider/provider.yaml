@@ -3,7 +3,7 @@
   description: 谷歌服务提供商，涵盖了谷歌搜索等工具
   icon: icon.svg
   background: "#E5E7EB"
-  category: 网络搜索
+  category: search
   created_at: 1722498386
 
 - name: duckduckgo
@@ -11,7 +11,7 @@
   description: 隐私保护的搜索引擎
   icon: icon.svg
   background: "#FFFFFF"
-  category: 网络搜索
+  category: search
   created_at: 1722498386
 
 - name: time
@@ -19,7 +19,7 @@
   description: 显示当前时间
   icon: icon.svg
   background: "#E5E7EB"
-  category: 实用工具
+  category: tool
   created_at: 1722498386
 
 - name: dalle
