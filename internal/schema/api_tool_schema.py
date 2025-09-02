@@ -4,6 +4,10 @@ from wtforms.validators import DataRequired, Length, URL, ValidationError
 
 from .schema import ListField
 
+from marshmallow import Schema, fields, pre_dump
+
+from ..model import ApiToolProvider
+
 
 class ValidateOpenAPISchemaReq(FlaskForm):
     """校验open api 规范请求"""
@@ -35,3 +39,23 @@ class CreateApiToolReq(FlaskForm):
                 raise ValidationError("headers里每一个元素必须是字典")
             if set(header.keys()) != {"key", "value"}:
                 raise ValidationError("只能包含key、value这两个属性")
+
+class GetApiToolProviderResp(Schema):
+    id=fields.UUID()
+    name=fields.String()
+    icon=fields.String()
+    openapi_schema=fields.String()
+    headers=fields.List(fields.Dict, default=[])
+    created_at=fields.Integer(default=0)
+
+
+    @pre_dump
+    def process_data(self, data: ApiToolProvider):
+        return {
+            "id": data.id,
+            "name": data.name,
+            "icon": data.icon,
+            "openapi_schema": data.openapi_schema,
+            "headers": data.headers,
+            "created_at": int(data.created_at.timestamp())
+        }

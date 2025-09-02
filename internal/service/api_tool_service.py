@@ -5,7 +5,7 @@ from injector import inject
 from dataclasses import dataclass
 
 from internal.core.tool.api_tool.entity import OpenAPISchema
-from internal.exception import ValidateErrorException
+from internal.exception import ValidateErrorException, NotFoundException
 from internal.schema.api_tool_schema import CreateApiToolReq
 from pkg.sqlalchemy import SQLAlchemy
 from internal.model import ApiToolProvider, ApiTool
@@ -61,3 +61,12 @@ class ApiToolService:
                         parameters=method_item.get("parameters", [])
                     )
                     self.db.session.add(api_tool)
+
+    def get_api_tool_provider(self, provider_id) -> ApiToolProvider:
+        # TODO 获取账号信息
+        account_id = ""
+        api_tool_provider = self.db.session.query(ApiToolProvider).get(provider_id)
+        if api_tool_provider is None or str(api_tool_provider.account_id) != account_id:
+            raise NotFoundException("工具提供者不存在")
+
+        return api_tool_provider
