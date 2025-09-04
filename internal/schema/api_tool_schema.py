@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField
-from wtforms.validators import DataRequired, Length, URL, ValidationError
-
+from wtforms.validators import DataRequired, Length, URL, ValidationError, Optional
+from pkg.paginator import PaginatorReq
 from .schema import ListField
 
 from marshmallow import Schema, fields, pre_dump
@@ -49,7 +49,7 @@ class GetApiToolProviderResp(Schema):
     created_at = fields.Integer(default=0)
 
     @pre_dump
-    def process_data(self, data: ApiToolProvider):
+    def process_data(self, data: ApiToolProvider, **kwargs):
         return {
             "id": data.id,
             "name": data.name,
@@ -82,4 +82,38 @@ class GetApiToolResp(Schema):
                 "description": provider.description,
                 "headers": provider.headers,
             }
+        }
+
+
+class GetApiToolProvidersWithPageReq(PaginatorReq):
+    search_word = StringField("search_field", validators=[
+        Optional()
+    ])
+
+
+class GetApiToolProvidersWithPageResp(Schema):
+    id = fields.UUID,
+    name = fields.String()
+    icon = fields.String()
+    description = fields.String()
+    headers = fields.List(fields.Dict, default=[])
+    tools = fields.List(fields.Dict, default=[])
+    created_at = fields.Integer(default=0)
+
+    @pre_dump
+    def process_data(self, data: ApiToolProvider, **kwargs):
+        tools = data.tools
+        return {
+            "id": data.id,
+            "name": data.name,
+            "icon": data.icon,
+            "description": data.description,
+            "headers": data.headers,
+            "created_at": int(data.created_at.timestamp()),
+            "tools": [{
+                "id": tool.id,
+                "name": tool.name,
+                "description": tool.description,
+                "input": [{k: v for k, v in parameter.items() if k != "in"} for parameter in tool.parameters],
+            } for tool in tools]
         }

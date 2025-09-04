@@ -45,7 +45,7 @@ class Router:
         )
 
         bp.add_url_rule(
-            "/api-tool/",
+            "/api-tool",
             methods=["POST"],
             view_func=self.api_tool_handler.create_api_tool
         )
@@ -66,6 +66,12 @@ class Router:
             "/api-tool/<uuid:provider_id>/tools/<string:tool_name>",
             methods=["POST"],
             view_func=self.api_tool_handler.delete_api_tool_provider
+        )
+
+        bp.add_url_rule(
+            "/api-tool/page",
+            methods=["GET"],
+            view_func=self.api_tool_handler.get_aoi_tool_providers_with_page
         )
 
         # 3.在应用上注册蓝图

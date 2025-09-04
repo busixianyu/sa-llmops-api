@@ -1,13 +1,16 @@
 import json
 from typing import Any
 from uuid import UUID
-
+from sqlalchemy import desc
 from injector import inject
 from dataclasses import dataclass
-
+from pkg.paginator import Paginator
 from internal.core.tool.api_tool.entity import OpenAPISchema
 from internal.exception import ValidateErrorException, NotFoundException
-from internal.schema.api_tool_schema import CreateApiToolReq
+from internal.schema.api_tool_schema import (
+    CreateApiToolReq,
+    GetApiToolProvidersWithPageReq
+)
 from pkg.sqlalchemy import SQLAlchemy
 from internal.model import ApiToolProvider, ApiTool
 
@@ -84,12 +87,25 @@ class ApiToolService:
         return api_tool
 
     def delete_api_tool_provider(self, provider_id: UUID):
-        # 获取账号
+        # todo 获取账号
         account_id = ""
         provider = self.get_api_tool_provider(provider_id)
         with self.db.auto_commit():
             self.db.session.query(ApiTool).filter(
-                ApiTool.provider_id==provider_id,
-                ApiTool.account_id==account_id
+                ApiTool.provider_id == provider_id,
+                ApiTool.account_id == account_id
             ).delete()
             self.db.session.delete(provider)
+
+    def get_api_tool_providers_with_page(self, req: GetApiToolProvidersWithPageReq) -> tuple[list[Any], Paginator]:
+        # todo 获取账号
+        account_id = ""
+        paginator = Paginator(db=self.db, req=req)
+        filters = [ApiToolProvider.account_id == account_id]
+        if req.search_word.data:
+            filters.append(ApiToolProvider.name.ilike(f"%{req.search_word.data}%"))
+
+        api_tool_providers = paginator.paginate(
+            self.db.session.query(ApiToolProvider).filter(*filters).order_by(desc("created_at"))
+        )
+        return api_tool_providers, paginator
