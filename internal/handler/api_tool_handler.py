@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from internal.schema.api_tool_schema import (
     ValidateOpenAPISchemaReq,
     CreateApiToolReq,
-    GetApiToolProviderResp
+    GetApiToolProviderResp,
+    GetApiToolResp
 )
 from pkg.response import validate_error_json, success_json
 from internal.service import ApiToolService
@@ -32,6 +33,10 @@ class ApiToolHandler:
         resp = GetApiToolProviderResp()
         return success_json(resp.dump(api_tool_provider))
 
+    def get_api_tool(self, provider_id:UUID, tool_name: str):
+        api_tool = self.api_tool_service.get_api_tool(provider_id, tool_name)
+        resp = GetApiToolResp()
+        return success_json(resp.dump(api_tool))
 
 
     def validate_openapi_schema(self):

@@ -6,7 +6,7 @@ from .schema import ListField
 
 from marshmallow import Schema, fields, pre_dump
 
-from ..model import ApiToolProvider
+from internal.model import ApiToolProvider, ApiTool
 
 
 class ValidateOpenAPISchemaReq(FlaskForm):
@@ -30,7 +30,6 @@ class CreateApiToolReq(FlaskForm):
     ])
     headers = ListField("headers")
 
-
     @classmethod
     def validate_headers(cls, form, filed):
         """校验headers请求的数据是否正确"""
@@ -40,14 +39,14 @@ class CreateApiToolReq(FlaskForm):
             if set(header.keys()) != {"key", "value"}:
                 raise ValidationError("只能包含key、value这两个属性")
 
-class GetApiToolProviderResp(Schema):
-    id=fields.UUID()
-    name=fields.String()
-    icon=fields.String()
-    openapi_schema=fields.String()
-    headers=fields.List(fields.Dict, default=[])
-    created_at=fields.Integer(default=0)
 
+class GetApiToolProviderResp(Schema):
+    id = fields.UUID()
+    name = fields.String()
+    icon = fields.String()
+    openapi_schema = fields.String()
+    headers = fields.List(fields.Dict, default=[])
+    created_at = fields.Integer(default=0)
 
     @pre_dump
     def process_data(self, data: ApiToolProvider):
@@ -58,4 +57,29 @@ class GetApiToolProviderResp(Schema):
             "openapi_schema": data.openapi_schema,
             "headers": data.headers,
             "created_at": int(data.created_at.timestamp())
+        }
+
+
+class GetApiToolResp(Schema):
+    id = fields.UUID()
+    name = fields.String()
+    description = fields.String()
+    inputs = fields.List(fields.Dict, default=[])
+    provider = fields.Dict()
+
+    @pre_dump
+    def process_data(self, data: ApiTool, **kwargs):
+        provider = data.provider
+        return {
+            "id": data.id,
+            "name": data.name,
+            "description": data.description,
+            "input": [{k: v for k, v in parameter.items() if k != "in"} for parameter in data.parameters],
+            "provider": {
+                "id": provider.id,
+                "name": provider.name,
+                "icon": provider.icon,
+                "description": provider.description,
+                "headers": provider.headers,
+            }
         }

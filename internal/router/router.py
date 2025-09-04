@@ -56,5 +56,11 @@ class Router:
             view_func=self.api_tool_handler.get_api_tool_provider
         )
 
+        bp.add_url_rule(
+            "/api-tool/<uuid:provider_id>/tools/<string:tool_name>",
+            methods=["GET"],
+            view_func=self.api_tool_handler.get_api_tool
+        )
+
         # 3.在应用上注册蓝图
         app.register_blueprint(bp)

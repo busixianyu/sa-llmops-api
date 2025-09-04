@@ -1,5 +1,6 @@
 import json
 from typing import Any
+from uuid import UUID
 
 from injector import inject
 from dataclasses import dataclass
@@ -62,7 +63,7 @@ class ApiToolService:
                     )
                     self.db.session.add(api_tool)
 
-    def get_api_tool_provider(self, provider_id) -> ApiToolProvider:
+    def get_api_tool_provider(self, provider_id: UUID) -> ApiToolProvider:
         # TODO 获取账号信息
         account_id = ""
         api_tool_provider = self.db.session.query(ApiToolProvider).get(provider_id)
@@ -70,3 +71,14 @@ class ApiToolService:
             raise NotFoundException("工具提供者不存在")
 
         return api_tool_provider
+
+    def get_api_tool(self, provider_id: UUID, tool_name: str) -> ApiTool:
+        # todo 获取账号
+        account_id = ""
+        api_tool = self.db.session.query(ApiTool).filter_by(
+            provider_id=provider_id,
+            name=tool_name
+        ).one_or_none()
+        if api_tool is None or str(api_tool.account_id) != account_id:
+            raise NotFoundException("该工具不存在")
+        return api_tool
