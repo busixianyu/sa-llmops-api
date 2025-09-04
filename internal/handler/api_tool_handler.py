@@ -8,7 +8,7 @@ from internal.schema.api_tool_schema import (
     GetApiToolProviderResp,
     GetApiToolResp
 )
-from pkg.response import validate_error_json, success_json
+from pkg.response import validate_error_json, success_json, success_message
 from internal.service import ApiToolService
 
 
@@ -38,6 +38,9 @@ class ApiToolHandler:
         resp = GetApiToolResp()
         return success_json(resp.dump(api_tool))
 
+    def delete_api_tool_provider(self, provider_id:UUID):
+        self.api_tool_service.delete_api_tool_provider(provider_id)
+        return success_message("删除自定义插件成功")
 
     def validate_openapi_schema(self):
         """验证openapi字符串是否正确"""
