@@ -9,7 +9,7 @@ from internal.core.tool.api_tool.entity import OpenAPISchema
 from internal.exception import ValidateErrorException, NotFoundException
 from internal.schema.api_tool_schema import (
     CreateApiToolReq,
-    GetApiToolProvidersWithPageReq
+    GetApiToolProvidersWithPageReq, UpdateApiToolProviderReq
 )
 from pkg.sqlalchemy import SQLAlchemy
 from internal.model import ApiToolProvider, ApiTool
@@ -109,3 +109,39 @@ class ApiToolService:
             self.db.session.query(ApiToolProvider).filter(*filters).order_by(desc("created_at"))
         )
         return api_tool_providers, paginator
+
+    def update_api_tool_provider(self, provider_id:UUID, req:UpdateApiToolProviderReq):
+        # todo 获取账号
+        account_id = ""
+        api_tool_provider = self.get_api_tool_provider(provider_id)
+        openapi_schema = self.parse_openai_schema(req.openapi_schema.data)
+        check_api_tool_provider = self.db.session.query(ApiToolProvider).filter(
+            ApiToolProvider.account_id==account_id,
+            ApiToolProvider.name==req.name.data,
+            ApiToolProvider.id!=api_tool_provider.id
+        ).one_or_none()
+        if check_api_tool_provider:
+            raise ValidateErrorException(f"该工具提供者名字{req.name.data}已存在")
+        with self.db.auto_commit():
+            self.db.session.query(ApiTool).filter(
+                ApiTool.provider_id==api_tool_provider.id,
+                ApiTool.account_id==account_id
+            ).delete()
+            api_tool_provider.name= req.name.data
+            api_tool_provider.icon=req.icon.data
+            api_tool_provider.headers=req.headers.data
+            api_tool_provider.openapi_schema=req.openapi_schema.data
+
+            for path, path_item in openapi_schema.paths.items():
+                for method, method_item in path_item.items():
+                    api_tool = ApiTool(
+                        account_id=account_id,
+                        provider_id=api_tool_provider.id,
+                        name=method_item.get("operationId"),
+                        description=method_item.get("description"),
+                        url=f"{openapi_schema.server}{path}",
+                        method=method,
+                        parameters=method_item.get("parameters", [])
+                    )
+                    self.db.session.add(api_tool)
+

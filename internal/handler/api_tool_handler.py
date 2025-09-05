@@ -8,7 +8,8 @@ from internal.schema.api_tool_schema import (
     GetApiToolProviderResp,
     GetApiToolResp,
     GetApiToolProvidersWithPageReq,
-    GetApiToolProvidersWithPageResp
+    GetApiToolProvidersWithPageResp,
+    UpdateApiToolProviderReq
 )
 from pkg.response import validate_error_json, success_json, success_message
 from internal.service import ApiToolService
@@ -21,18 +22,23 @@ class ApiToolHandler:
     """自定义API插件处理器"""
     api_tool_service: ApiToolService
 
-    def get_aoi_tool_providers_with_page(self):
+    def get_api_tool_providers_with_page(self):
         req = GetApiToolProvidersWithPageReq(request.args)
         if req.validate():
             return validate_error_json(req.errors)
 
         providers, paginator = self.api_tool_service.get_api_tool_providers_with_page(req)
 
-        resp = GetApiToolProviderResp(many=True)
+        resp = GetApiToolProvidersWithPageResp(many=True)
 
         return success_json(PageModel(list=resp.dump(providers), paginator=paginator))
 
-
+    def update_api_tool_provider(self, provider_id:UUID):
+        req = UpdateApiToolProviderReq()
+        if not req.validate():
+            return validate_error_json(req.errors)
+        self.api_tool_service.update_api_tool_provider(provider_id, req)
+        return success_message("更新API插件成功")
 
 
     def create_api_tool(self):

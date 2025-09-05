@@ -71,7 +71,13 @@ class Router:
         bp.add_url_rule(
             "/api-tool/page",
             methods=["GET"],
-            view_func=self.api_tool_handler.get_aoi_tool_providers_with_page
+            view_func=self.api_tool_handler.get_api_tool_providers_with_page
+        )
+
+        bp.add_url_rule(
+            "/api-tool/<uuid:provider_id>",
+            methods=["POST"],
+            view_func=self.api_tool_handler.update_api_tool_provider
         )
 
         # 3.在应用上注册蓝图
