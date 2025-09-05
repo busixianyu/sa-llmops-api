@@ -13,11 +13,12 @@ from internal.schema.api_tool_schema import (
 )
 from pkg.sqlalchemy import SQLAlchemy
 from internal.model import ApiToolProvider, ApiTool
+from .base_service import BaseService
 
 
 @inject
 @dataclass
-class ApiToolService:
+class ApiToolService(BaseService):
     db: SQLAlchemy
 
     @classmethod
@@ -69,7 +70,7 @@ class ApiToolService:
     def get_api_tool_provider(self, provider_id: UUID) -> ApiToolProvider:
         # TODO 获取账号信息
         account_id = ""
-        api_tool_provider = self.db.session.query(ApiToolProvider).get(provider_id)
+        api_tool_provider = self.get(ApiToolProvider, provider_id)
         if api_tool_provider is None or str(api_tool_provider.account_id) != account_id:
             raise NotFoundException("工具提供者不存在")
 
@@ -127,6 +128,12 @@ class ApiToolService:
                 ApiTool.provider_id==api_tool_provider.id,
                 ApiTool.account_id==account_id
             ).delete()
+            # self.update(api_tool_provider,
+            #             name=req.name.data,
+            #             icon=req.icon.data,
+            #             headers=req.headers.data,
+            #             openapi_schema=req.openapi_schema.data
+            #             )
             api_tool_provider.name= req.name.data
             api_tool_provider.icon=req.icon.data
             api_tool_provider.headers=req.headers.data
