@@ -40,7 +40,6 @@ class ApiToolHandler:
         self.api_tool_service.update_api_tool_provider(provider_id, req)
         return success_message("更新API插件成功")
 
-
     def create_api_tool(self):
         """创建自定义api工具"""
         req = CreateApiToolReq()
@@ -49,7 +48,6 @@ class ApiToolHandler:
 
         self.api_tool_service.create_api_tool(req)
         return success_json("创建自定义API插件成功")
-
 
     def get_api_tool_provider(self, provider_id: UUID):
         api_tool_provider = self.api_tool_service.get_api_tool_provider(provider_id)

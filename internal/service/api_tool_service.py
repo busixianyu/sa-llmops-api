@@ -5,7 +5,7 @@ from sqlalchemy import desc
 from injector import inject
 from dataclasses import dataclass
 from pkg.paginator import Paginator
-from internal.core.tool.api_tool.entity import OpenAPISchema
+from internal.core.tool.api_tool.entity import OpenAPISchema, ToolEntity
 from internal.exception import ValidateErrorException, NotFoundException
 from internal.schema.api_tool_schema import (
     CreateApiToolReq,
@@ -14,12 +14,14 @@ from internal.schema.api_tool_schema import (
 from pkg.sqlalchemy import SQLAlchemy
 from internal.model import ApiToolProvider, ApiTool
 from .base_service import BaseService
+from internal.core.tool.api_tool.provider import ApiProviderManager
 
 
 @inject
 @dataclass
 class ApiToolService(BaseService):
     db: SQLAlchemy
+    api_provider_manager: ApiProviderManager
 
     @classmethod
     def parse_openai_schema(cls, openapi_schema_str: str) -> OpenAPISchema:
@@ -111,22 +113,22 @@ class ApiToolService(BaseService):
         )
         return api_tool_providers, paginator
 
-    def update_api_tool_provider(self, provider_id:UUID, req:UpdateApiToolProviderReq):
+    def update_api_tool_provider(self, provider_id: UUID, req: UpdateApiToolProviderReq):
         # todo 获取账号
         account_id = ""
         api_tool_provider = self.get_api_tool_provider(provider_id)
         openapi_schema = self.parse_openai_schema(req.openapi_schema.data)
         check_api_tool_provider = self.db.session.query(ApiToolProvider).filter(
-            ApiToolProvider.account_id==account_id,
-            ApiToolProvider.name==req.name.data,
-            ApiToolProvider.id!=api_tool_provider.id
+            ApiToolProvider.account_id == account_id,
+            ApiToolProvider.name == req.name.data,
+            ApiToolProvider.id != api_tool_provider.id
         ).one_or_none()
         if check_api_tool_provider:
             raise ValidateErrorException(f"该工具提供者名字{req.name.data}已存在")
         with self.db.auto_commit():
             self.db.session.query(ApiTool).filter(
-                ApiTool.provider_id==api_tool_provider.id,
-                ApiTool.account_id==account_id
+                ApiTool.provider_id == api_tool_provider.id,
+                ApiTool.account_id == account_id
             ).delete()
             # self.update(api_tool_provider,
             #             name=req.name.data,
@@ -134,10 +136,10 @@ class ApiToolService(BaseService):
             #             headers=req.headers.data,
             #             openapi_schema=req.openapi_schema.data
             #             )
-            api_tool_provider.name= req.name.data
-            api_tool_provider.icon=req.icon.data
-            api_tool_provider.headers=req.headers.data
-            api_tool_provider.openapi_schema=req.openapi_schema.data
+            api_tool_provider.name = req.name.data
+            api_tool_provider.icon = req.icon.data
+            api_tool_provider.headers = req.headers.data
+            api_tool_provider.openapi_schema = req.openapi_schema.data
 
             for path, path_item in openapi_schema.paths.items():
                 for method, method_item in path_item.items():
@@ -152,3 +154,19 @@ class ApiToolService(BaseService):
                     )
                     self.db.session.add(api_tool)
 
+    def api_tool_invoke(self):
+        provider_id = "e41fb663-2aff-4b5f-9076-fe7afd467cb0"
+        tool_name = "BeautifulTool"
+        api_tool = self.get_api_tool(provider_id, tool_name)
+        tool = self.api_provider_manager.get_tool(
+            ToolEntity(
+                id=provider_id,
+                name=tool_name,
+                url=api_tool.url,
+                method=api_tool.method,
+                description=api_tool.description,
+                headers=api_tool.provider.headers,
+                parameters=api_tool.parameters
+            )
+        )
+        return tool.invoke({"q": "love", "doctype": "json"})
