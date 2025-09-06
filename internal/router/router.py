@@ -63,7 +63,7 @@ class Router:
         )
 
         bp.add_url_rule(
-            "/api-tool/<uuid:provider_id>/tools/<string:tool_name>",
+            "/api-tool/<uuid:provider_id>/delete",
             methods=["POST"],
             view_func=self.api_tool_handler.delete_api_tool_provider
         )
