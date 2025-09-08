@@ -25,7 +25,7 @@ class Router:
         bp.add_url_rule("/app/<uuid:id>", methods=["DELETE"],view_func=self.app_handler.delete_app)
 
         # 内置插件
-        bp.add_url_rule("/builtin-tool", methods=["GET"], view_func=self.builtin_tool_handler.get_builtin_tools)
+        bp.add_url_rule("/builtin-tools", methods=["GET"], view_func=self.builtin_tool_handler.get_builtin_tools)
         bp.add_url_rule("/builtin-tool/<string:provider_name>/tool/<string:tool_name>", methods=["GET"], view_func=self.builtin_tool_handler.get_provider_tool)
         bp.add_url_rule(
             "/builtin-tool/<string:provider_name>/icon",
